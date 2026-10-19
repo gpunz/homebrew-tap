@@ -1,0 +1,26 @@
+name: test
+
+# Installs the formula from this tap on macOS and Linux and runs the binary.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  install:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Homebrew/actions/setup-homebrew@master
+      - name: Install from this checkout
+        run: |
+          brew tap-new --no-git local/check
+          cp Formula/gpunz.rb "$(brew --repository local/check)/Formula/"
+          brew install local/check/gpunz
+      - run: gpunz version
+      - run: brew test local/check/gpunz
